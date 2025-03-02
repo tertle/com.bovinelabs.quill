@@ -113,6 +113,28 @@ There are a few things to consider before using `GlobalDraw`:
 - Unlike `Drawer`, `GlobalDraw` is only available in the editor and will not be included when `BL_DEBUG` is defined.
 - Enabling `GlobalDraw` creates a synchronization point between all Worlds to ensure safety.
 
+### Enabling
+
+`GlobalDraw` must be manually enabled using the `draw.enabled-global` ConfigVar, which can be accessed from the **ConfigVar Window** under `BovineLabs -> ConfigVar`.  
+Once you're done debugging, you should disable it again to avoid unnecessary synchronization overhead.
+
+Note: When running in editor world GlobalDraw is always enabled to make editor tooling 
+
+![GlobalDrawConfigVar](Documentation~/Images/GlobalDrawConfigVar.png)
+
+### Example
+
+```csharp
+[BurstCompile]
+partial struct TestDrawJob : IJobEntity
+{
+    private static void Execute(Entity entity, in LocalTransform lt)
+    {
+        GlobalDraw.Text128(lt.Position, entity.ToFixedString(), Color.red);
+    }
+}
+```
+
 ### Drawing in Editor
 
 `GlobalDraw` can also be used outside of play mode in the Editor. However, it's important to note that events like `EditorApplication.update` can trigger dozens of times per render update.
@@ -134,28 +156,6 @@ public class DrawTest
         {
             GlobalDraw.Text64(float3.zero, "Test text", Color.white, 32);
         }
-    }
-}
-```
-
-### Enabling
-
-`GlobalDraw` must be manually enabled using the `draw.enabled-global` ConfigVar, which can be accessed from the **ConfigVar Window** under `BovineLabs -> ConfigVar`.  
-Once you're done debugging, you should disable it again to avoid unnecessary synchronization overhead.
-
-Note: When running in editor world GlobalDraw is always enabled to make editor tooling 
-
-![GlobalDrawConfigVar](Documentation~/Images/GlobalDrawConfigVar.png)
-
-### Example
-
-```csharp
-[BurstCompile]
-partial struct TestDrawJob : IJobEntity
-{
-    private static void Execute(Entity entity, in LocalTransform lt)
-    {
-        GlobalDraw.Text128(lt.Position, entity.ToFixedString(), Color.red);
     }
 }
 ```
