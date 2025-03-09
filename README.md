@@ -15,6 +15,19 @@ Unless you plan to integrate it with your own systems, it is recommended to use 
 
 For setup instructions, refer to the Anchor README, included in the package or available online [here](https://gitlab.com/tertle/com.bovinelabs.anchor/-/blob/main/README.md#setup).
 
+## Configuration
+
+Global configuration which can be accessed from the **ConfigVar Window** under `BovineLabs -> ConfigVar`.
+
+![GlobalDrawConfigVar](Documentation~/Images/Configuration.png)
+
+| Key                  | Description                                                                                       |
+|----------------------|---------------------------------------------------------------------------------------------------|
+| draw.editor-playmode | Should the DrawEditor.Update execute while in play mode? Global draw needs to be enabled as well. |
+| draw.enabled         | Sets the global drawer enabled state drawer.                                                      |
+| draw.enabled-global  | Enable the global drawer in the editor.                                                           |
+| draw.scene-camera    | Draw using scene camera instead of game camera when required.                                     |
+
 ## Drawer
 
 The standard way of using the library is to request a `Drawer`, pass it to a job, and use it to draw.
@@ -113,9 +126,30 @@ There are a few things to consider before using `GlobalDraw`:
 - Unlike `Drawer`, `GlobalDraw` is only available in the editor and will not be included when `BL_DEBUG` is defined.
 - Enabling `GlobalDraw` creates a synchronization point between all Worlds to ensure safety.
 
+### Enabling
+
+`GlobalDraw` must be manually enabled using the `draw.enabled-global` ConfigVar. For more details, refer to the [Configuration](#configuration) section.
+
+Once you're done debugging, you should disable it again to avoid unnecessary synchronization overhead.
+
+Note: When running in editor world GlobalDraw is always enabled to make editor tooling.
+
+### Example
+
+```csharp
+[BurstCompile]
+partial struct TestDrawJob : IJobEntity
+{
+    private static void Execute(Entity entity, in LocalTransform lt)
+    {
+        GlobalDraw.Text128(lt.Position, entity.ToFixedString(), Color.red);
+    }
+}
+```
+
 ### Drawing in Editor
 
-`GlobalDraw` can also be used outside of play mode in the Editor. However, it's important to note that events like `EditorApplication.update` can trigger dozens of times per render update.
+`GlobalDraw` can also be used outside of play mode in the Editor. However, it's important to note that events like `EditorApplication.update` can trigger dozens of times per render update in the editor.
 
 Apart from being bad for performance, this can cause drawings, particularly text, to appear bold and hard to read. To avoid this, you can use `FrameUtility` to ensure drawing occurs only once per frame.
 
@@ -138,24 +172,23 @@ public class DrawTest
 }
 ```
 
-### Enabling
-
-`GlobalDraw` must be manually enabled using the `draw.enabled-global` ConfigVar, which can be accessed from the **ConfigVar Window** under `BovineLabs -> ConfigVar`.  
-Once you're done debugging, you should disable it again to avoid unnecessary synchronization overhead.
-
-Note: When running in editor world GlobalDraw is always enabled to make editor tooling 
-
-![GlobalDrawConfigVar](Documentation~/Images/GlobalDrawConfigVar.png)
-
-### Example
+However, instead of using `EditorApplication.update`, you can use the built-in `DrawEditor.Update` event. This simplifies the example as follows:
 
 ```csharp
-[BurstCompile]
-partial struct TestDrawJob : IJobEntity
+[InitializeOnLoad]
+public static class DrawTest
 {
-    private static void Execute(Entity entity, in LocalTransform lt)
+    static DrawTest()
     {
-        GlobalDraw.Text128(lt.Position, entity.ToFixedString(), Color.red);
+        DrawEditor.Update += Update;
+    }
+
+    private static void Update()
+    {
+        GlobalDraw.Text64(float3.zero, "Test text", Color.white, 32);
     }
 }
 ```
+
+By default, `DrawEditor.Update` will not run in play mode. This behavior can be toggled using the `draw.editor-playmode` ConfigVar.
+For more details, refer to the [Configuration](#configuration) section.
