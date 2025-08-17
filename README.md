@@ -125,6 +125,7 @@ There are a few things to consider before using `GlobalDraw`:
 - `GlobalDraw` is intended only for quick debugging code, not for persistent debug systems.
 - Unlike `Drawer`, `GlobalDraw` is only available in the editor and will not be included when `BL_DEBUG` is defined.
 - Enabling `GlobalDraw` creates a synchronization point between all Worlds to ensure safety.
+- `GlobalDraw` has no container safety, so if you forget to write back your safety handle you may corrupt your draw without warning.
 
 ### Enabling
 
