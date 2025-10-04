@@ -1,5 +1,20 @@
-# Changelog
-## [1.1.2] - 2025-07-17
+## [1.2.0] - 2025-10-02
+
+### Added
+* A bunch of config variables for customizing how default drawers work
+* DrawSystem singleton now has CameraCulling property you can pass to jobs for frustum culling
+
+### Changed
+* Added frustum culling to physics drawing
+* Switched to use SparseUploader
+
+### Fixed
+* Buffer inflight errors
+
+### Removed
+* Internal frustum culling as i rarely helped; instead I've exposed the data so you can easily apply frustum culling to your own custom draw systems
+
+## [1.1.2] - 2025-08-17
 
 ### Added
 * Support for APP_UI_EDITOR_ONLY
